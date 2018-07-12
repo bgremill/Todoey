@@ -10,11 +10,11 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-        let itemArray = ["Walmart","Sams","CVS"]
+    var itemArray = ["Walmart","Sams","CVS"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
     }
 
     //MARK - Tableview Datasource Methods
@@ -27,6 +27,7 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
+        //Create a reusable cell
         let cell = tableView.dequeueReusableCell(withIdentifier: "TodoItemCell", for: indexPath)
         
         cell.textLabel?.text = itemArray[indexPath.row]
@@ -36,6 +37,8 @@ class TodoListViewController: UITableViewController {
     }
     
     //MARK - TableView Delegate Methods
+    
+    //This method gets called when a row is selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         //Add or remove a checkmark when selected
@@ -45,10 +48,40 @@ class TodoListViewController: UITableViewController {
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
         
+        //So the row will flash gray and then go back to white when the user clicks it
         tableView.deselectRow(at: indexPath, animated: true)
         
     }
     
+    //MARK - Add New Items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            
+            //what will happen once the user clicks the add item button on our UIAlert
+            
+            //add our new item to our array
+            self.itemArray.append(textField.text!)
+            
+            //to make the new item show up on the screen
+            self.tableView.reloadData()
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+        
+        alert.addAction(action)
+        
+        //Show our alert
+        present(alert, animated: true, completion: nil)
+        
+    }
     
 }
 
