@@ -12,11 +12,16 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = ["Walmart","Sams","CVS"]
     
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+         itemArray = items
+        }
     }
-
+    
     //MARK - Tableview Datasource Methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
@@ -66,6 +71,9 @@ class TodoListViewController: UITableViewController {
             
             //add our new item to our array
             self.itemArray.append(textField.text!)
+            
+            //save the new itemArray to our user defaults
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             
             //to make the new item show up on the screen
             self.tableView.reloadData()
