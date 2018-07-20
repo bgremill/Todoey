@@ -12,28 +12,23 @@ class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]()
     
-    let defaults = UserDefaults.standard
+    //After we stopped using User Defaults
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    
+//When we were using User Defaults
+//    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        loadItems()
         
-
-        //Using the new class
-        let newItem = Item()
-        newItem.title = "Walmart"
-        itemArray.append(newItem)
-
-        let newItem2 = Item()
-        newItem2.title = "CVS"
-        itemArray.append(newItem2)
-
-        let newItem3 = Item()
-        newItem3.title = "Kohl's"
-        itemArray.append(newItem3)
-
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
+        
+//When we were using User Defaults
+//        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
+//            itemArray = items
+//        }
 
     }
     
@@ -78,7 +73,7 @@ class TodoListViewController: UITableViewController {
         //Sets the done property on the current item to the opposite of what it is right now
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.reloadData()
+        saveItems()
 
 //Code before we added the Item Data Model
 //        //Add or remove a checkmark when selected
@@ -98,8 +93,6 @@ class TodoListViewController: UITableViewController {
     //MARK - Add New Items
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
-        print("Inside addButtonPressed")
-        
         var textField = UITextField()
         
         let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
@@ -116,36 +109,59 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField.text!
             self.itemArray.append(newItem)
+
+//Before we switched from User Defaults to NSCoder
+//            //save the new itemArray to our user defaults
+//            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+
         
-            print("Inside addButtonPressed after append")
+            self.saveItems()
             
-            //save the new itemArray to our user defaults
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            
-            print("Inside addButtonPressed after save")
-            
-            //to make the new item show up on the screen
-            self.tableView.reloadData()
-            
-            print("Inside addButtonPressed after reload")
         }
         
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
             textField = alertTextField
-            print("Inside alert.addTextField")
         }
         
         alert.addAction(action)
-        
-        print("Inside addButtonPressed after alert.addAction")
-        
+
         //Show our alert
         present(alert, animated: true, completion: nil)
         
-        print("Inside addButtonPressed after present")
+    }
+    
+    
+    //MARK - Model Manipulations Methods
+    
+    //Created after we switched from User Defaults to NS Coder
+    //Encoding
+    func saveItems() {
+        let encoder = PropertyListEncoder()
         
-        
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error encoding item array, \(error)")
+        }
+
+        //to make the new item show up on the screen
+        tableView.reloadData()
+
+    }
+
+    //Created after we switched from User Defaults to NS Coder
+    //Decoding
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
     }
     
 }

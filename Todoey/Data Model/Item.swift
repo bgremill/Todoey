@@ -8,7 +8,9 @@
 
 import Foundation
 
-class Item {
+//Added Codable when switched from User Defaults to NSCoder
+//Could have used Encodable, Decodable instead of just Codable
+class Item: Codable {
     
     var title: String = ""
     var done: Bool = false
